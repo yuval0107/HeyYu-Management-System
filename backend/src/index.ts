@@ -19,6 +19,7 @@ import workspaceRoutes from "./routes/workspace.route";
 import memberRoutes from "./routes/member.route";
 import projectRoutes from "./routes/project.route";
 import taskRoutes from "./routes/task.route";
+import path from "path";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
@@ -56,7 +57,7 @@ app.get(
       ErrorCodeEnum.AUTH_INVALID_TOKEN
     );
     return res.status(HTTPSTATUS.OK).json({
-      message: "Hello Subscribe to the channel & share",
+      message: "Ok working",
     });
   })
 );
@@ -68,6 +69,14 @@ app.use(`${BASE_PATH}/member`, isAuthenticated, memberRoutes);
 app.use(`${BASE_PATH}/project`, isAuthenticated, projectRoutes);
 app.use(`${BASE_PATH}/task`, isAuthenticated, taskRoutes);
 
+    // Serve React app for all other routes
+    app.use((req, res, next) => {
+      if (req.method === "GET" && !req.path.startsWith("/api")) {
+        res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
+      } else {
+        next();
+      }
+    });
 app.use(errorHandler);
 
 app.listen(config.PORT, async () => {
